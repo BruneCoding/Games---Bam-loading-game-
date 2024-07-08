@@ -1,0 +1,159 @@
+<!-- This is the Bam Loading Screen -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Player Model Loading Screen</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #3498db;
+      /* Set blue background */
+    }
+
+    canvas {
+      display: block;
+      background: transparent;
+    }
+
+    .bgBlue {
+      position: absolute;
+      z-index: 1;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(121, 192, 247, 0.05);
+      backdrop-filter: blur(2px);
+      display: flex;
+      color: #f0f0f0;
+      font-family: "Luckiest Guy", cursive;
+      text-align: center;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    #loading-wave {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background-color: rgba(121, 192, 247, 1);
+      opacity: 0.5;
+      animation: wave 2s linear infinite;
+      filter: blur(10px);
+    }
+
+    @keyframes wave {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    #loading-wave::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(121, 192, 247, 0.5);
+      filter: blur(15px);
+      opacity: 0.5;
+      animation: wave 2s linear infinite reverse;
+    }
+  </style>
+</head>
+
+<div class="bgBlue">
+  <h1> Loading ... </h1>
+</div>
+
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    // Texture loader
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load('https://i.imgur.com/iosuG3C.png');
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(5, 10, 7.5).normalize();
+    scene.add(directionalLight);
+    // Custom cube geometry with equal sides
+    const size = 2; // Size of the cube
+    const geometry = new THREE.BoxGeometry(size, size, size);
+    // Apply texture to each face of the cube
+    const materials = [
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }), // Right side
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }), // Left side
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }), // Top side
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }), // Bottom side
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }), // Front side
+      new THREE.MeshBasicMaterial({
+        map: texture
+      }) // Back side
+    ];
+    const cube = new THREE.Mesh(geometry, materials);
+    scene.add(cube);
+    // Camera position
+    camera.position.z = 5;
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      // Rotate the cube
+      cube.rotation.x += 0.01;
+      cube.rotation.y += 0.01;
+      renderer.render(scene, camera);
+    }
+    animate();
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    });
+    // Alert "Loaded" when wave reaches end
+    const loadingWave = document.createElement('div');
+    loadingWave.id = 'loading-wave';
+    document.body.appendChild(loadingWave);
+
+    function checkLoadingStatus() {
+      const waveWidth = loadingWave.offsetWidth;
+      const screenWidth = window.innerWidth;
+      if (waveWidth >= screenWidth) {
+        console.log('loading screen loaded');
+      } else {
+        requestAnimationFrame(checkLoadingStatus);
+      }
+    }
+    checkLoadingStatus();
+  </script>
+</body>
+
+</html>
